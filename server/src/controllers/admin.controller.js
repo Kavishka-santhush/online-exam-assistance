@@ -243,6 +243,7 @@ module.exports = {
   deleteOrganization,
   deleteUser,
   getOrganization,
+  getUser,
   health,
   listAnnouncements,
   listFeatureFlags,
