@@ -93,5 +93,5 @@ UPDATE "Organization" SET "name" = "name";
 CREATE INDEX "Organization_searchBlob_idx" ON "Organization" USING GIN ("searchBlob");
 
 -- --- Fuzzy trigram lookups --------------------------------------------------
-CREATE INDEX "QuestionBank_name_trgm_idx" ON "QuestionBank" USING GIN ("name" gin_trgm_ops);
-CREATE INDEX "Exam_title_trgm_idx" ON "Exam" USING GIN ((coalesce("title", '')) gin_trgm_ops);
+CREATE INDEX IF NOT EXISTS "QuestionBank_name_trgm_idx" ON "QuestionBank" USING GIN ("name" gin_trgm_ops);
+CREATE INDEX IF NOT EXISTS "Exam_title_trgm_idx" ON "Exam" USING GIN ("title" gin_trgm_ops);
