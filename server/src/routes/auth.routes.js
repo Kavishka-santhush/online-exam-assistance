@@ -7,7 +7,8 @@
  */
 
 const express = require('express');
-const { clerkMiddleware, clerkWebhook } = require('@clerk/express');
+const { clerkMiddleware } = require('@clerk/express');
+const { webhook } = require('@clerk/backend');
 const { z } = require('zod');
 const env = require('../config/env');
 const controller = require('../controllers/auth.controller');
@@ -16,6 +17,25 @@ const { validate } = require('../middleware/validate.middleware');
 const { authLimiter } = require('../middleware/rateLimit.middleware');
 
 const router = express.Router();
+
+// @clerk/express exposes no webhook helper; verify the svix signature with
+// @clerk/backend and normalise the raw body for the controller.
+const clerkWebhookGuard = (secret) => async (req, res, next) => {
+  if (!String(secret || '').startsWith('whsec_')) {
+    return res.status(503).json({ ok: false, message: 'Clerk webhook secret is not configured' });
+  }
+  try {
+    await webhook.verifyToken(secret, {
+      svixId: req.headers['svix-id'],
+      svixTimestamp: req.headers['svix-timestamp'],
+      svixSignature: req.headers['svix-signature'],
+    }, req.body);
+    req.body = JSON.parse(req.body.toString('utf8'));
+    return next();
+  } catch (err) {
+    return res.status(400).json({ ok: false, message: 'Invalid webhook signature' });
+  }
+};
 
 const updateProfileSchema = z.object({
   displayName: z.string().trim().min(1).max(120).optional(),
@@ -37,7 +57,7 @@ router.post(
   '/webhook/clerk',
   express.raw({ type: 'application/json' }),
   authLimiter,
-  clerkWebhook(env.CLERK_WEBHOOK_SECRET),
+  clerkWebhookGuard(env.CLERK_WEBHOOK_SECRET),
   controller.clerkWebhook,
 );
 
