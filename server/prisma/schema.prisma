@@ -447,6 +447,7 @@ model User {
   gradeOverrides       GradeOverride[]
   payments             Payment[]
   invoices             Invoice[]
+  questionBankShares   QuestionBankShare[]
   promoCodes           PromoCode[]
   bulkRegistrations    BulkRegistration[]
   notifications        Notification[]
@@ -542,6 +543,8 @@ model Organization {
   invites         OrganizationInvite[]
   subscription    OrganizationSubscription?
   questionBanks   QuestionBank[]
+  questions       Question[]
+  examTemplates   ExamTemplate[]
   categories      QuestionCategory[]
   exams           Exam[]
   examCategories  ExamCategory[]
@@ -1153,6 +1156,7 @@ model Attempt {
   terminatedBy User?            @relation("AttemptTerminator", fields: [terminatedById], references: [id], onDelete: SetNull)
   answers      Answer[]
   proctorSession ProctorSession?
+  proctorMessages ProctorMessage[]
   violations   Violation[]
   recordings   ExamRecording[]
   note         ExamNote?
@@ -1667,7 +1671,7 @@ model Payment {
   attempt      Attempt?           @relation(fields: [attemptId], references: [id], onDelete: SetNull)
   certificate  Certificate?       @relation(fields: [certificateId], references: [id], onDelete: SetNull)
   promoCode    PromoCode?         @relation(fields: [promoCodeId], references: [id], onDelete: SetNull)
-  invoice      Invoice?           @relation("PaymentInvoice", fields: [invoiceId], references: [id], onDelete: SetNull)
+  invoice      Invoice?           @relation("PaymentInvoice")
 
   @@index([userId, status])
   @@index([organizationId, createdAt])
