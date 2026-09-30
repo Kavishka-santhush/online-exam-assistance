@@ -1,0 +1,23 @@
+{
+  "name": "exam-platform",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Online Exam & Assessment Platform - monorepo root (client + server)",
+  "workspaces": [
+    "server",
+    "client"
+  ],
+  "scripts": {
+    "dev:server": "npm --workspace server run dev",
+    "dev:client": "npm --workspace client run dev",
+    "start:server": "npm --workspace server run start",
+    "build:client": "npm --workspace client run build",
+    "prisma:generate": "npm --workspace server run prisma:generate",
+    "prisma:migrate": "npm --workspace server run prisma:migrate",
+    "prisma:deploy": "npm --workspace server run prisma:deploy",
+    "prisma:seed": "npm --workspace server run prisma:seed"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

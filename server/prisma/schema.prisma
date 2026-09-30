@@ -1,0 +1,2028 @@
+// ---------------------------------------------------------------------------
+// Online Exam & Assessment Platform - Prisma schema (PostgreSQL)
+// Migrations + seeders only; this file is never applied by the AI agent.
+// ---------------------------------------------------------------------------
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearch", "postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [pg_trgm]
+}
+
+// ============================ ENUMS ========================================
+
+enum PlatformRole {
+  SUPER_ADMIN
+  ADMIN
+  USER
+}
+
+enum MemberRole {
+  ORG_ADMIN
+  INSTRUCTOR
+  PROCTOR
+  CANDIDATE
+}
+
+enum UserStatus {
+  ACTIVE
+  PENDING
+  SUSPENDED
+  DEACTIVATED
+}
+
+enum InviteStatus {
+  PENDING
+  ACCEPTED
+  EXPIRED
+  REVOKED
+}
+
+enum QuestionType {
+  MULTIPLE_CHOICE
+  MULTIPLE_ANSWER
+  TRUE_FALSE
+  SHORT_ANSWER
+  LONG_ANSWER
+  FILL_BLANK
+  MATCHING
+  ORDERING
+  DROPDOWN
+  HOTSPOT
+  CODING
+  FILE_UPLOAD
+  AUDIO_RECORDING
+  VIDEO_RECORDING
+  MATH_FORMULA
+  DRAWING
+  LIKERT_SCALE
+  RATING_SCALE
+  MATRIX
+}
+
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+  EXPERT
+}
+
+enum BloomsLevel {
+  REMEMBER
+  UNDERSTAND
+  APPLY
+  ANALYZE
+  EVALUATE
+  CREATE
+}
+
+enum QuestionStatus {
+  DRAFT
+  IN_REVIEW
+  APPROVED
+  REJECTED
+  ARCHIVED
+}
+
+enum ReviewAction {
+  APPROVE
+  REJECT
+  REQUEST_CHANGES
+}
+
+enum BankAccess {
+  VIEW
+  EDIT
+  MANAGE
+}
+
+enum ExamType {
+  QUIZ
+  TEST
+  MOCK_EXAM
+  CERTIFICATION
+  PRACTICE
+  SURVEY
+  ASSIGNMENT
+  LIVE_QUIZ
+}
+
+enum ExamStatus {
+  DRAFT
+  SCHEDULED
+  PUBLISHED
+  ACTIVE
+  CLOSED
+  ARCHIVED
+}
+
+enum AccessControl {
+  PUBLIC
+  ORGANIZATION
+  SPECIFIC_CANDIDATES
+  ACCESS_CODE
+  INVITE_LINK
+}
+
+enum ResultVisibility {
+  IMMEDIATELY
+  AFTER_ALL_SUBMIT
+  ON_DATE
+  NEVER
+}
+
+enum RefundPolicy {
+  NO_REFUND
+  BEFORE_WINDOW
+  ALWAYS_REFUNDABLE
+}
+
+enum RegistrationStatus {
+  PENDING
+  REGISTERED
+  INVITED
+  PAID
+  COMPLETED
+  WITHDRAWN
+}
+
+enum AttemptStatus {
+  IN_PROGRESS
+  PAUSED
+  SUBMITTED
+  AUTO_SUBMITTED
+  GRADED
+  TERMINATED
+  EXPIRED
+}
+
+enum GradingStatus {
+  NOT_REQUIRED
+  UNGRADED
+  IN_PROGRESS
+  GRADED
+  RELEASED
+}
+
+enum ProctorSessionStatus {
+  PENDING_SETUP
+  PENDING_REVIEW
+  APPROVED
+  REJECTED
+  ACTIVE
+  ENDED
+}
+
+enum ViolationType {
+  TAB_SWITCH
+  WINDOW_SWITCH
+  FULLSCREEN_EXIT
+  FACE_NOT_DETECTED
+  MULTIPLE_FACES
+  COPY_PASTE
+  CUT_ATTEMPT
+  RIGHT_CLICK
+  KEYBOARD_SHORTCUT
+  DEVTOOLS_OPENED
+  SECOND_DEVICE
+  AUDIO_DETECTED
+  GAZE_ANOMALY
+  NETWORK_ANOMALY
+  MOVEMENT_DETECTED
+  PROCTOR_FLAG
+  AI_SUSPICION
+}
+
+enum ViolationSeverity {
+  WARNING
+  MINOR
+  MAJOR
+  CRITICAL
+}
+
+enum RecordingKind {
+  WEBCAM
+  SCREEN
+  AUDIO_ANSWER
+  VIDEO_ANSWER
+}
+
+enum MediaKind {
+  AVATAR
+  ORG_LOGO
+  EXAM_THUMBNAIL
+  QUESTION_IMAGE
+  QUESTION_AUDIO
+  QUESTION_VIDEO
+  ANSWER_ATTACHMENT
+  ANSWER_DRAWING
+  ID_DOCUMENT
+  SELFIE
+  ENVIRONMENT_SCAN
+  VIOLATION_SCREENSHOT
+  WEBCAM_RECORDING
+  SCREEN_RECORDING
+  RESULT_PDF
+  CERTIFICATE_PDF
+  INVOICE_PDF
+  REPORT_PDF
+  IMPORT_FILE
+  EXPORT_FILE
+}
+
+enum MessageKind {
+  MESSAGE
+  WARNING
+  PAUSE
+  RESUME
+  TERMINATE
+  EXTRA_TIME
+  SYSTEM
+}
+
+enum CertificateStatus {
+  PENDING
+  ISSUED
+  REVOKED
+  EXPIRED
+}
+
+enum PaymentProvider {
+  STRIPE
+  MANUAL
+  PROMO
+}
+
+enum PaymentPurpose {
+  EXAM_FEE
+  SUBSCRIPTION
+  CERTIFICATION_FEE
+  BULK_SEATS
+  REFUND
+}
+
+enum PaymentStatus {
+  PENDING
+  REQUIRES_ACTION
+  SUCCEEDED
+  FAILED
+  CANCELED
+  REFUNDED
+  PARTIALLY_REFUNDED
+}
+
+enum PlanTier {
+  FREE
+  STARTER
+  PRO
+  ENTERPRISE
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  TRIALING
+  PAST_DUE
+  CANCELED
+  EXPIRED
+  INCOMPLETE
+}
+
+enum PromoKind {
+  PERCENT
+  FIXED
+  SCHOLARSHIP
+}
+
+enum NotificationType {
+  EXAM_ASSIGNED
+  EXAM_REMINDER
+  EXAM_STARTING
+  EXAM_WINDOW_CLOSING
+  RESULTS_RELEASED
+  GRADING_COMPLETED
+  CERTIFICATE_ISSUED
+  VIOLATION_FLAGGED
+  PROCTOR_MESSAGE
+  NEW_EXAM_PUBLISHED
+  REGISTRATION_CONFIRMED
+  PAYMENT_RECEIVED
+  PAYMENT_FAILED
+  ORGANIZATION_INVITE
+  ANNOUNCEMENT
+  AI_LIMIT_WARNING
+  SUBSCRIPTION_WARNING
+}
+
+enum NotificationChannel {
+  IN_APP
+  EMAIL
+  SMS
+  PUSH
+}
+
+enum LiveQuizStatus {
+  WAITING
+  RUNNING
+  PAUSED
+  ENDED
+}
+
+enum AnalyticsScope {
+  PLATFORM
+  ORGANIZATION
+  EXAM
+  SECTION
+  QUESTION
+  CANDIDATE
+  TOPIC
+}
+
+enum AiFeature {
+  QUESTION_GENERATOR
+  ESSAY_GRADER
+  CODE_REVIEWER
+  CHEATING_DETECTION
+  DIFFICULTY_CALIBRATOR
+  QUALITY_CHECKER
+  ADAPTIVE_ENGINE
+  FEEDBACK_GENERATOR
+  RETAKE_COACH
+  BLUEPRINT_GENERATOR
+  ANSWER_KEY_VALIDATOR
+  BANK_RECOMMENDATION
+  NL_SEARCH
+  PASS_RATE_PREDICTOR
+  SUMMARY_REPORT
+  PROCTOR_ASSISTANT
+}
+
+enum AiCallStatus {
+  SUCCESS
+  ERROR
+  TIMEOUT
+  RATE_LIMITED
+  BLOCKED_LIMIT
+}
+
+enum AnnouncementAudience {
+  ALL_USERS
+  ORGANIZATION
+  EXAM_CANDIDATES
+  INSTRUCTORS
+}
+
+enum FeedbackKind {
+  AI_PERSONALIZED
+  AI_RETAKE_COACH
+  INSTRUCTOR_NOTE
+  AI_EXAM_SUMMARY
+}
+
+// ============================ IDENTITY =====================================
+
+model User {
+  id              String       @id @default(uuid())
+  clerkId         String       @unique
+  email           String       @unique
+  primaryEmail    String?
+  firstName       String?
+  lastName        String?
+  displayName     String?
+  imageUrl        String?
+  coverImageUrl   String?
+  bio             String?      @db.Text
+  timezone        String       @default("UTC")
+  language        String       @default("en")
+  phone           String?
+  country         String?
+  platformRole    PlatformRole @default(USER)
+  status          UserStatus   @default(ACTIVE)
+  emailVerified   Boolean      @default(false)
+  twoFactorEnabled Boolean     @default(false)
+  isPublicProfile Boolean      @default(true)
+  searchVector    String?      @db.Text
+  lastActiveAt    DateTime?
+  suspendedAt     DateTime?
+  deactivatedAt   DateTime?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  memberships          OrganizationMember[]
+  invitedMemberships   OrganizationMember[]  @relation("MemberInviter")
+  createdOrganizations Organization[]         @relation("OrgCreator")
+  candidateProfile     CandidateProfile?
+  instructorProfile    InstructorProfile?
+  questionBanks        QuestionBank[]
+  questions            Question[]             @relation("QuestionAuthor")
+  questionVersions     QuestionVersion[]
+  questionReviews      QuestionReview[]
+  exams                Exam[]                 @relation("ExamAuthor")
+  examVersions         ExamVersion[]
+  examTemplates        ExamTemplate[]
+  examCategories       ExamCategory[]
+  registrations        ExamCandidate[]        @relation("ExamRegistrationUser")
+  assignedRegistrations ExamCandidate[]       @relation("ExamAssigner")
+  attempts             Attempt[]
+  terminatedAttempts   Attempt[]              @relation("AttemptTerminator")
+  answers              Answer[]               @relation("AnswerGrader")
+  files                UploadedFile[]
+  proctorSessions      ProctorSession[]       @relation("ProctorReviewer")
+  violationsResolved   Violation[]            @relation("ViolationResolver")
+  proctorMessagesSent  ProctorMessage[]       @relation("ProctorMessageSender")
+  proctorMessagesRcv   ProctorMessage[]       @relation("ProctorMessageReceiver")
+  liveQuizSessions     LiveQuizSession[]
+  teams                Team[]
+  liveQuizResults      LiveQuizQuestionResult[]
+  certificates         Certificate[]
+  issuedCertificates   Certificate[]          @relation("CertificateIssuer")
+  revokedCertificates  Certificate[]          @relation("CertificateRevoker")
+  rubrics              GradingRubric[]
+  gradingAssignments   GradingAssignment[]    @relation("GradingAssignee")
+  gradingAssignedBy    GradingAssignment[]    @relation("GradingAssigner")
+  gradeOverrides       GradeOverride[]
+  payments             Payment[]
+  invoices             Invoice[]
+  promoCodes           PromoCode[]
+  bulkRegistrations    BulkRegistration[]
+  notifications        Notification[]
+  notificationPrefs    NotificationPreference?
+  analytics            AnalyticsAggregate[]
+  questionStats        QuestionStat[]
+  auditLogs            AuditLog[]
+  announcements        Announcement[]
+  feedback             AttemptFeedback[]
+  aiUsage              AiUsageLog[]
+  settingsUpdated      PlatformSetting[]
+  featureFlagsUpdated  FeatureFlag[]
+
+  @@index([email])
+  @@index([platformRole, status])
+  @@index([displayName])
+  @@index([createdAt])
+}
+
+model CandidateProfile {
+  id               String  @id @default(uuid())
+  userId           String  @unique
+  headline         String?
+  institution      String?
+  degree           String?
+  graduationYear   Int?
+  educationJson    Json    @default("[]")
+  skillsJson       Json    @default("[]")
+  interestsJson    Json    @default("[]")
+  goals            String? @db.Text
+  totalExams       Int     @default(0)
+  totalCertificates Int    @default(0)
+  averageScore     Decimal @default(0) @db.Decimal(5, 2)
+  studyTimeMinutes Int     @default(0)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([institution])
+}
+
+model InstructorProfile {
+  id              String   @id @default(uuid())
+  userId          String   @unique
+  expertise       String[] @default([])
+  bio             String?  @db.Text
+  website         String?
+  rating          Decimal  @default(0) @db.Decimal(3, 2)
+  ratingCount     Int      @default(0)
+  totalExams      Int      @default(0)
+  totalCandidates Int      @default(0)
+  verified        Boolean  @default(false)
+  awardsBadge     Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([rating])
+}
+
+// ========================= ORGANIZATIONS ===================================
+
+model Organization {
+  id             String   @id @default(uuid())
+  name           String
+  slug           String   @unique
+  description    String?  @db.Text
+  website        String?
+  contactEmail   String?
+  contactPhone   String?
+  addressLine1   String?
+  city           String?
+  country        String?
+  industry       String?
+  taxId          String?
+  logoUrl        String?
+  isApproved     Boolean  @default(false)
+  isSuspended    Boolean  @default(false)
+  isWhiteLabel   Boolean  @default(false)
+  settings       Json     @default("{}")
+  branding       Json     @default("{}")
+  emailSender    String?
+  defaultExamSettings Json @default("{}")
+  customDomain   String?  @unique
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  suspendedAt    DateTime?
+  createdById    String?
+
+  members         OrganizationMember[]
+  invites         OrganizationInvite[]
+  subscription    OrganizationSubscription?
+  questionBanks   QuestionBank[]
+  categories      QuestionCategory[]
+  exams           Exam[]
+  examCategories  ExamCategory[]
+  attempts        Attempt[]
+  certificates    Certificate[]
+  certTemplates   CertificateTemplate[]
+  payments        Payment[]
+  invoices        Invoice[]
+  promoCodes      PromoCode[]
+  bulkRegistrations BulkRegistration[]
+  analytics       AnalyticsAggregate[]
+  announcements   Announcement[]
+  aiUsage         AiUsageLog[]
+  auditLogs       AuditLog[]
+  settingRows     OrganizationSetting[]
+
+  createdBy       User? @relation("OrgCreator", fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([name])
+  @@index([isApproved, isSuspended])
+  @@index([createdAt])
+}
+
+model OrganizationSetting {
+  id             String   @id @default(uuid())
+  organizationId String
+  key            String
+  value          Json
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, key])
+}
+
+model OrganizationMember {
+  id             String     @id @default(uuid())
+  organizationId String
+  userId         String
+  role           MemberRole @default(CANDIDATE)
+  status         UserStatus @default(ACTIVE)
+  permissions    Json       @default("[]")
+  displayName    String?
+  department     String?
+  employeeId     String?
+  joinedAt       DateTime   @default(now())
+  invitedById    String?
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  inviter      User?        @relation("MemberInviter", fields: [invitedById], references: [id], onDelete: SetNull)
+
+  @@unique([organizationId, userId])
+  @@index([userId, role])
+  @@index([organizationId, role])
+}
+
+model OrganizationInvite {
+  id             String     @id @default(uuid())
+  organizationId String
+  email          String
+  role           MemberRole @default(CANDIDATE)
+  token          String     @unique
+  message        String?    @db.Text
+  status         InviteStatus @default(PENDING)
+  invitedById    String?
+  expiresAt      DateTime
+  acceptedAt     DateTime?
+  acceptedById   String?
+  createdAt      DateTime   @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, status])
+  @@index([email])
+}
+
+// ========================= SUBSCRIPTIONS ===================================
+
+model SubscriptionPlan {
+  id             String    @id @default(uuid())
+  code           PlanTier  @unique
+  name           String
+  slug           String    @unique
+  description    String?   @db.Text
+  priceMonthly   Int       @default(0)
+  priceYearly    Int       @default(0)
+  currency       String    @default("usd")
+  stripePriceId  String?
+  maxExams       Int       @default(3)
+  maxCandidatesPerExam Int @default(50)
+  maxAiRequestsPerDay  Int @default(0)
+  maxStorageMb   Int       @default(500)
+  features       Json      @default("[]")
+  limits         Json      @default("{}")
+  isProctoringIncluded Boolean @default(false)
+  isWhiteLabelIncluded Boolean @default(false)
+  isAdaptiveIncluded Boolean @default(false)
+  isLiveQuizIncluded Boolean @default(false)
+  isPopular      Boolean   @default(false)
+  isActive       Boolean   @default(true)
+  sortOrder      Int       @default(0)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  subscriptions OrganizationSubscription[]
+}
+
+model OrganizationSubscription {
+  id                   String             @id @default(uuid())
+  organizationId       String             @unique
+  planId               String
+  status               SubscriptionStatus @default(TRIALING)
+  stripeCustomerId     String?
+  stripeSubscriptionId String?
+  seats                Int                @default(10)
+  trialEndsAt          DateTime?
+  currentPeriodStart   DateTime           @default(now())
+  currentPeriodEnd     DateTime
+  cancelAtPeriodEnd    Boolean            @default(false)
+  aiRequestsUsedToday  Int                @default(0)
+  apiCallsUsedToday    Int                @default(0)
+  lastBilledAt         DateTime?
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+
+  organization Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  plan         SubscriptionPlan   @relation(fields: [planId], references: [id], onDelete: Restrict)
+
+  @@index([planId, status])
+}
+
+// ========================= QUESTION BANK ===================================
+
+model QuestionCategory {
+  id             String   @id @default(uuid())
+  organizationId String
+  parentId       String?
+  name           String
+  slug           String
+  description    String?  @db.Text
+  level          Int      @default(0)
+  sortOrder      Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  parent       QuestionCategory?  @relation("CategoryTree", fields: [parentId], references: [id], onDelete: SetNull)
+  children     QuestionCategory[] @relation("CategoryTree")
+  banks        QuestionBank[]
+
+  @@unique([organizationId, slug])
+  @@index([organizationId, parentId])
+}
+
+model QuestionBank {
+  id             String       @id @default(uuid())
+  organizationId String
+  ownerId        String
+  categoryId     String?
+  name           String
+  slug           String
+  description    String?      @db.Text
+  isShared       Boolean      @default(false)
+  isArchived     Boolean      @default(false)
+  questionCount  Int          @default(0)
+  tags           String[]     @default([])
+  settings       Json         @default("{}")
+  archivedAt     DateTime?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  organization Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  category     QuestionCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  owner        User              @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  shares       QuestionBankShare[]
+  questions    Question[]
+  pools        ExamPool[]
+
+  @@unique([organizationId, slug])
+  @@index([organizationId, isArchived])
+  @@index([ownerId])
+}
+
+model QuestionBankShare {
+  id         String     @id @default(uuid())
+  bankId     String
+  userId     String
+  access     BankAccess @default(VIEW)
+  createdAt  DateTime   @default(now())
+
+  bank QuestionBank @relation(fields: [bankId], references: [id], onDelete: Cascade)
+  user User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([bankId, userId])
+  @@index([userId])
+}
+
+model Question {
+  id                  String       @id @default(uuid())
+  organizationId      String
+  bankId              String?
+  categoryId          String?
+  createdById         String
+  type                QuestionType
+  status              QuestionStatus @default(DRAFT)
+  prompt              String         @db.Text
+  promptPlain         String?        @db.Text
+  content             Json           @default("{}")
+  explanation         String?        @db.Text
+  solution            String?        @db.Text
+  imageUrls           String[]       @default([])
+  audioUrl            String?
+  videoUrl            String?
+  youtubeUrl          String?
+  marks               Decimal        @default(1) @db.Decimal(7, 2)
+  negativePercent     Decimal        @default(0) @db.Decimal(5, 2)
+  partialMarking      Boolean        @default(false)
+  difficulty          Difficulty     @default(MEDIUM)
+  bloomsLevel         BloomsLevel?
+  estimatedTimeSec    Int            @default(60)
+  hint                String?        @db.Text
+  hintCostMarks       Decimal        @default(0) @db.Decimal(7, 2)
+  language            String         @default("en")
+  learningObjectives  String[]       @default([])
+  topicTags           String[]       @default([])
+  codeConfig          Json?
+  rubricCriteria      Json           @default("[]")
+  currentVersion      Int            @default(1)
+  reviewNote          String?        @db.Text
+  reviewedById        String?
+  reviewedAt          DateTime?
+  usageCount          Int            @default(0)
+  timesAnswered       Int            @default(0)
+  timesCorrect        Int            @default(0)
+  avgScorePercent     Decimal        @default(0) @db.Decimal(5, 2)
+  difficultyIndex     Decimal        @default(0) @db.Decimal(5, 4)
+  discriminationIndex Decimal        @default(0) @db.Decimal(5, 4)
+  avgTimeSec          Decimal        @default(0) @db.Decimal(9, 2)
+  skipRate            Decimal        @default(0) @db.Decimal(5, 4)
+  isDeprecated        Boolean        @default(false)
+  archivedAt          DateTime?
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+
+  organization  Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  bank          QuestionBank?     @relation(fields: [bankId], references: [id], onDelete: SetNull)
+  createdBy     User              @relation("QuestionAuthor", fields: [createdById], references: [id], onDelete: Restrict)
+  versions      QuestionVersion[]
+  reviews       QuestionReview[]
+  examQuestions ExamQuestion[]
+  answers       Answer[]
+  stats         QuestionStat[]
+  pools         ExamPool[]
+  liveResults   LiveQuizQuestionResult[]
+
+  @@index([organizationId, status])
+  @@index([bankId])
+  @@index([type, difficulty])
+  @@index([createdById])
+  @@index([categoryId])
+  @@index([createdAt])
+}
+
+model QuestionVersion {
+  id          String   @id @default(uuid())
+  questionId  String
+  version     Int
+  prompt      String   @db.Text
+  content     Json
+  marks       Decimal  @db.Decimal(7, 2)
+  changeNote  String?
+  changedById String?
+  createdAt   DateTime @default(now())
+
+  question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  changedBy User?  @relation(fields: [changedById], references: [id], onDelete: SetNull)
+
+  @@unique([questionId, version])
+  @@index([questionId])
+}
+
+model QuestionReview {
+  id         String       @id @default(uuid())
+  questionId String
+  reviewerId String
+  action     ReviewAction
+  comment    String?      @db.Text
+  createdAt  DateTime     @default(now())
+
+  question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  reviewer User     @relation(fields: [reviewerId], references: [id], onDelete: Cascade)
+
+  @@index([questionId])
+}
+
+
+// ============================== EXAMS ======================================
+
+model ExamCategory {
+  id             String   @id @default(uuid())
+  organizationId String
+  name           String
+  slug           String
+  description    String?  @db.Text
+  color          String?
+  createdById    String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdBy    User?        @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  exams        Exam[]
+
+  @@unique([organizationId, slug])
+  @@index([organizationId])
+}
+
+model Exam {
+  id                  String           @id @default(uuid())
+  organizationId      String
+  createdById         String
+  categoryId          String?
+  title               String
+  slug                String
+  description         String?          @db.Text
+  instructions        String?          @db.Text
+  thumbnailUrl        String?
+  type                ExamType         @default(TEST)
+  status              ExamStatus       @default(DRAFT)
+  language            String           @default("en")
+  languages           String[]         @default(["en"])
+  accessControl       AccessControl    @default(ORGANIZATION)
+  accessCode          String?
+  inviteToken         String?          @unique
+  previewToken        String?          @unique
+  examFeeCents        Int              @default(0)
+  currency            String           @default("usd")
+  refundPolicy        RefundPolicy     @default(NO_REFUND)
+  certificationFeeCents Int            @default(0)
+  totalMarks          Decimal          @default(0) @db.Decimal(9, 2)
+  passingPercent      Decimal          @default(50) @db.Decimal(5, 2)
+  durationMinutes     Int              @default(60)
+  perQuestionSec      Int?
+  attemptLimit        Int              @default(1)
+  startsAt            DateTime?
+  endsAt              DateTime?
+  resultsVisibleAt    DateTime?
+  resultVisibility    ResultVisibility @default(IMMEDIATELY)
+  gradeBoundaries     Json             @default("{}")
+  settings            Json             @default("{}")
+  proctoringConfig    Json             @default("{}")
+  adaptiveConfig      Json             @default("{}")
+  scoringConfig       Json             @default("{}")
+  accessibilityConfig Json             @default("{}")
+  isProctored         Boolean          @default(false)
+  isAdaptive          Boolean          @default(false)
+  isAutoGraded        Boolean          @default(true)
+  answerReviewEnabled Boolean          @default(true)
+  shuffleQuestions    Boolean          @default(false)
+  shuffleOptions      Boolean          @default(false)
+  negativeMarking     Boolean          @default(false)
+  partialMarking      Boolean          @default(false)
+  calculatorAllowed   Boolean          @default(false)
+  scratchpadAllowed   Boolean          @default(false)
+  attachmentAllowed   Boolean          @default(false)
+  requireCamera       Boolean          @default(false)
+  requireScreenShare  Boolean          @default(false)
+  recordWebcam        Boolean          @default(false)
+  recordScreen        Boolean          @default(false)
+  maxCandidates       Int              @default(1000)
+  questionCount       Int              @default(0)
+  version             Int              @default(1)
+  publishedAt         DateTime?
+  closedAt            DateTime?
+  archivedAt          DateTime?
+  gradesReleasedAt    DateTime?
+  clonedFromId        String?
+  derivedFromTemplateId String?
+  totalAttempts       Int              @default(0)
+  totalRegistrations  Int              @default(0)
+  averageScore        Decimal          @default(0) @db.Decimal(5, 2)
+  passRate            Decimal          @default(0) @db.Decimal(5, 2)
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
+
+  organization     Organization        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdBy        User                @relation("ExamAuthor", fields: [createdById], references: [id], onDelete: Restrict)
+  category         ExamCategory?       @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  clonedFrom       Exam?               @relation("ExamClone", fields: [clonedFromId], references: [id], onDelete: SetNull)
+  clones           Exam[]              @relation("ExamClone")
+  sections         ExamSection[]
+  examQuestions    ExamQuestion[]
+  versions         ExamVersion[]
+  registrations    ExamCandidate[]
+  attempts         Attempt[]
+  rubrics          GradingRubric[]
+  certificateTemplate CertificateTemplate?
+  certificates     Certificate[]
+  payments         Payment[]
+  invoices         Invoice[]
+  promoCodes       PromoCode[]
+  bulkRegistrations BulkRegistration[]
+  analytics        AnalyticsAggregate[]
+  questionStats    QuestionStat[]
+  liveQuizSessions LiveQuizSession[]
+  gradingAssignments GradingAssignment[]
+  announcements    Announcement[]
+
+  @@unique([organizationId, slug])
+  @@index([organizationId, status])
+  @@index([createdById])
+  @@index([type, status])
+  @@index([startsAt, endsAt])
+  @@index([status, publishedAt])
+  @@index([createdAt])
+}
+
+model ExamVersion {
+  id          String   @id @default(uuid())
+  examId      String
+  version     Int
+  snapshot    Json
+  changeNote  String?
+  createdById String?
+  publishedAt DateTime @default(now())
+
+  exam      Exam  @relation(fields: [examId], references: [id], onDelete: Cascade)
+  createdBy User? @relation(fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@unique([examId, version])
+  @@index([examId])
+}
+
+model ExamTemplate {
+  id             String   @id @default(uuid())
+  organizationId String
+  name           String
+  description    String?  @db.Text
+  structure      Json
+  createdById    String
+  useCount       Int      @default(0)
+  isPublic       Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdBy    User         @relation(fields: [createdById], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+}
+
+model ExamSection {
+  id              String   @id @default(uuid())
+  examId          String
+  name            String
+  instructions    String?  @db.Text
+  order           Int      @default(0)
+  durationMinutes Int?
+  questionCount   Int      @default(0)
+  poolSize        Int?
+  pickCount       Int?
+  randomFromPool  Boolean  @default(false)
+  sectionMarks    Decimal  @default(0) @db.Decimal(9, 2)
+  canNavigateBack Boolean  @default(true)
+  isLocked        Boolean  @default(false)
+  settings        Json     @default("{}")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  exam     Exam           @relation(fields: [examId], references: [id], onDelete: Cascade)
+  questions ExamQuestion[]
+  pools    ExamPool[]
+
+  @@index([examId, order])
+}
+
+model ExamQuestion {
+  id              String   @id @default(uuid())
+  examId          String
+  sectionId       String?
+  questionId      String
+  order           Int      @default(0)
+  marks           Decimal  @default(1) @db.Decimal(7, 2)
+  weightage       Decimal  @default(1) @db.Decimal(5, 2)
+  isRequired      Boolean  @default(true)
+  negativePercent Decimal?
+  createdAt       DateTime @default(now())
+
+  exam      Exam           @relation(fields: [examId], references: [id], onDelete: Cascade)
+  section   ExamSection?   @relation(fields: [sectionId], references: [id], onDelete: SetNull)
+  question  Question       @relation(fields: [questionId], references: [id], onDelete: Restrict)
+  answers   Answer[]
+
+  @@unique([examId, questionId])
+  @@index([examId, order])
+  @@index([sectionId])
+  @@index([questionId])
+}
+
+model ExamPool {
+  id         String   @id @default(uuid())
+  sectionId  String
+  bankId     String?
+  filters    Json     @default("{}")
+  pickCount  Int      @default(5)
+  createdAt  DateTime @default(now())
+
+  section   ExamSection  @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  bank      QuestionBank? @relation(fields: [bankId], references: [id], onDelete: SetNull)
+  questions Question[]
+
+  @@index([sectionId])
+}
+
+model ExamCandidate {
+  id               String             @id @default(uuid())
+  examId           String
+  userId           String
+  status           RegistrationStatus @default(PENDING)
+  assignedById     String?
+  inviteToken      String?            @unique
+  paidAmountCents  Int                @default(0)
+  paymentId        String?
+  seatNumber       Int?
+  registeredAt     DateTime           @default(now())
+  accessGrantedAt  DateTime?
+  completedAt      DateTime?
+  withdrawalReason String?
+
+  exam      Exam  @relation(fields: [examId], references: [id], onDelete: Cascade)
+  user      User  @relation("ExamRegistrationUser", fields: [userId], references: [id], onDelete: Cascade)
+  assignedBy User? @relation("ExamAssigner", fields: [assignedById], references: [id], onDelete: SetNull)
+  attempts  Attempt[]
+
+  @@unique([examId, userId])
+  @@index([examId, status])
+  @@index([userId, status])
+}
+
+// ============================= ATTEMPTS ====================================
+
+model Attempt {
+  id                String        @id @default(uuid())
+  examId            String
+  examVersion       Int           @default(1)
+  userId            String
+  organizationId    String?
+  registrationId    String?
+  attemptNumber     Int           @default(1)
+  status            AttemptStatus @default(IN_PROGRESS)
+  gradingStatus     GradingStatus @default(UNGRADED)
+  startedAt         DateTime      @default(now())
+  expiresAt         DateTime?
+  submittedAt       DateTime?
+  gradedAt          DateTime?
+  releasedAt        DateTime?
+  pausedAt          DateTime?
+  resumedAt         DateTime?
+  timeLimitSec      Int?
+  extraTimeSec      Int           @default(0)
+  usedTimeSec       Int           @default(0)
+  remainingTimeSec  Int?
+  rawScore          Decimal       @default(0) @db.Decimal(9, 2)
+  negativeDeducted  Decimal       @default(0) @db.Decimal(9, 2)
+  partialAwarded    Decimal       @default(0) @db.Decimal(9, 2)
+  totalMarks        Decimal       @default(0) @db.Decimal(9, 2)
+  finalScore        Decimal       @default(0) @db.Decimal(9, 2)
+  scorePercent      Decimal       @default(0) @db.Decimal(5, 2)
+  passed            Boolean?
+  gradeLetter       String?
+  percentile        Decimal?      @db.Decimal(5, 2)
+  abilityScore      Decimal?      @db.Decimal(7, 3)
+  abilityStdErr     Decimal?      @db.Decimal(7, 3)
+  isAdaptive        Boolean       @default(false)
+  adaptiveState     Json          @default("{}")
+  answerOrder       Json          @default("[]")
+  sectionProgress   Json          @default("{}")
+  currentSectionId  String?
+  currentQuestionOrder Int?
+  answeredCount     Int           @default(0)
+  markedForReview   Json          @default("[]")
+  hintsRevealed     Json          @default("[]")
+  lastAutoSaveAt    DateTime?
+  lastActivityAt    DateTime?
+  isFlagged         Boolean       @default(false)
+  riskScore         Decimal       @default(0) @db.Decimal(5, 2)
+  violationCount    Int           @default(0)
+  isTerminated      Boolean       @default(false)
+  terminatedById    String?
+  terminationReason String?       @db.Text
+  terminatedAt      DateTime?
+  autoSubmitted     Boolean       @default(false)
+  ip                String?
+  userAgent         String?
+  deviceInfo        Json          @default("{}")
+  shareToken        String?       @unique
+  isAnonymous       Boolean       @default(false)
+  metadata          Json          @default("{}")
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  exam         Exam             @relation(fields: [examId], references: [id], onDelete: Cascade)
+  user         User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization Organization?    @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  registration ExamCandidate?   @relation(fields: [registrationId], references: [id], onDelete: SetNull)
+  terminatedBy User?            @relation("AttemptTerminator", fields: [terminatedById], references: [id], onDelete: SetNull)
+  answers      Answer[]
+  proctorSession ProctorSession?
+  violations   Violation[]
+  recordings   ExamRecording[]
+  note         ExamNote?
+  feedback     AttemptFeedback[]
+  gradeOverrides GradeOverride[]
+  gradingAssignments GradingAssignment[]
+  certificates Certificate[]
+  payments     Payment[]
+
+  @@index([examId, status])
+  @@index([userId, createdAt])
+  @@index([organizationId, createdAt])
+  @@index([status, expiresAt])
+  @@index([gradingStatus])
+  @@index([examId, userId, attemptNumber])
+  @@index([createdAt])
+}
+
+model Answer {
+  id                String        @id @default(uuid())
+  attemptId         String
+  questionId        String
+  examQuestionId    String?
+  questionVersion   Int           @default(1)
+  order             Int           @default(0)
+  sectionId         String?
+  response          Json          @default("{}")
+  textAnswer        String?       @db.Text
+  selectedOptions   String[]      @default([])
+  matchedPairs      Json          @default("[]")
+  orderedItems      Json          @default("[]")
+  blankAnswers      Json          @default("[]")
+  hotspotClicks     Json          @default("[]")
+  codeLanguage      String?
+  codeSource        String?       @db.Text
+  testRunResults    Json?
+  ratingValue       Int?
+  matrixResponses   Json          @default("{}")
+  mathLatex         String?
+  maxMarks          Decimal       @default(0) @db.Decimal(7, 2)
+  autoScore         Decimal?      @db.Decimal(7, 2)
+  manualScore       Decimal?      @db.Decimal(7, 2)
+  finalScore        Decimal?      @db.Decimal(7, 2)
+  isCorrect         Boolean?
+  isPartial         Boolean?
+  gradingStatus     GradingStatus @default(UNGRADED)
+  needsManualGrading Boolean      @default(false)
+  gradedById        String?
+  gradedAt          DateTime?
+  graderNote        String?       @db.Text
+  feedback          String?       @db.Text
+  secondScore       Decimal?      @db.Decimal(7, 2)
+  secondGraderNote  String?       @db.Text
+  secondGradedById  String?
+  disagreement      Boolean       @default(false)
+  aiScore           Decimal?      @db.Decimal(7, 2)
+  aiFeedback        String?       @db.Text
+  aiRubricScores    Json          @default("{}")
+  wordCount         Int           @default(0)
+  timeSpentSec      Int           @default(0)
+  isMarkedForReview Boolean       @default(false)
+  isFlagged         Boolean       @default(false)
+  wasSkipped        Boolean       @default(false)
+  answeredAt        DateTime?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  attempt         Attempt         @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  question        Question        @relation(fields: [questionId], references: [id], onDelete: Restrict)
+  examQuestion    ExamQuestion?   @relation(fields: [examQuestionId], references: [id], onDelete: SetNull)
+  gradedBy        User?           @relation("AnswerGrader", fields: [gradedById], references: [id], onDelete: SetNull)
+  files           UploadedFile[]
+  rubricScores    RubricScore[]
+  gradeOverrides  GradeOverride[]
+
+  @@unique([attemptId, questionId])
+  @@index([attemptId])
+  @@index([questionId])
+  @@index([gradingStatus])
+  @@index([needsManualGrading, gradingStatus])
+}
+
+model ExamNote {
+  id        String   @id @default(uuid())
+  attemptId String   @unique
+  content   String   @db.Text
+  updatedAt DateTime @updatedAt
+
+  attempt Attempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+}
+
+model UploadedFile {
+  id             String    @id @default(uuid())
+  userId         String?
+  organizationId String?
+  examId         String?
+  attemptId      String?
+  questionId     String?
+  answerId       String?
+  certificateId  String?
+  kind           MediaKind
+  url            String
+  storagePath    String
+  originalName   String
+  mimeType       String
+  sizeBytes      Int
+  checksum       String?
+  width          Int?
+  height         Int?
+  durationSec    Int?
+  isScanned      Boolean   @default(false)
+  metadata       Json      @default("{}")
+  createdAt      DateTime  @default(now())
+
+  user        User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  answer      Answer?   @relation(fields: [answerId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([kind])
+  @@index([attemptId])
+  @@index([answerId])
+  @@index([createdAt])
+}
+
+// ============================ PROCTORING ===================================
+
+model ProctorSession {
+  id                String               @id @default(uuid())
+  attemptId         String               @unique
+  examId            String
+  userId            String
+  status            ProctorSessionStatus @default(PENDING_SETUP)
+  systemCheck       Json                 @default("{}")
+  idDocFrontUrl     String?
+  idDocBackUrl      String?
+  selfieUrl         String?
+  environmentUrls   String[]             @default([])
+  faceMatchScore    Decimal?             @db.Decimal(5, 2)
+  termsAccepted     Boolean              @default(false)
+  termsAcceptedAt   DateTime?
+  recordingConsent  Boolean              @default(false)
+  lockdownEnabled   Boolean              @default(true)
+  fullscreenRequired Boolean             @default(true)
+  browserInfo       Json                 @default("{}")
+  reviewNote        String?              @db.Text
+  reviewedById      String?
+  reviewedAt        DateTime?
+  startedAt         DateTime?
+  endedAt           DateTime?
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+
+  attempt   Attempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  reviewedBy User? @relation("ProctorReviewer", fields: [reviewedById], references: [id], onDelete: SetNull)
+  violations Violation[]
+  messages  ProctorMessage[]
+  recordings ExamRecording[]
+
+  @@index([examId, status])
+  @@index([status, createdAt])
+}
+
+model Violation {
+  id             String             @id @default(uuid())
+  attemptId      String
+  proctorSessionId String?
+  examId         String
+  userId         String
+  type           ViolationType
+  severity       ViolationSeverity  @default(MINOR)
+  occurredAt     DateTime           @default(now())
+  count          Int                @default(1)
+  description    String?            @db.Text
+  evidenceUrls   String[]           @default([])
+  screenshotUrl  String?
+  details        Json               @default("{}")
+  isResolved     Boolean            @default(false)
+  resolvedById   String?
+  resolvedAt     DateTime?
+  resolution     String?            @db.Text
+  aiRiskScore    Decimal?           @db.Decimal(5, 2)
+  aiReason       String?            @db.Text
+  manualFlag     Boolean            @default(false)
+  createdAt      DateTime           @default(now())
+
+  attempt        Attempt          @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  proctorSession ProctorSession?  @relation(fields: [proctorSessionId], references: [id], onDelete: SetNull)
+  resolvedBy     User?            @relation("ViolationResolver", fields: [resolvedById], references: [id], onDelete: SetNull)
+
+  @@index([attemptId, occurredAt])
+  @@index([examId, type])
+  @@index([userId])
+  @@index([severity, isResolved])
+  @@index([occurredAt])
+}
+
+model ProctorMessage {
+  id               String      @id @default(uuid())
+  attemptId        String
+  proctorSessionId String?
+  examId           String
+  fromUserId       String
+  toUserId         String
+  kind         MessageKind @default(MESSAGE)
+  body         String      @db.Text
+  metadata     Json        @default("{}")
+  readAt       DateTime?
+  deliveredAt  DateTime?
+  createdAt    DateTime    @default(now())
+
+  attempt     Attempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  session     ProctorSession? @relation(fields: [proctorSessionId], references: [id], onDelete: Cascade)
+  sender      User    @relation("ProctorMessageSender", fields: [fromUserId], references: [id], onDelete: Cascade)
+  recipient   User    @relation("ProctorMessageReceiver", fields: [toUserId], references: [id], onDelete: Cascade)
+
+  @@index([attemptId, createdAt])
+  @@index([proctorSessionId])
+  @@index([toUserId, readAt])
+}
+
+model ExamRecording {
+  id             String        @id @default(uuid())
+  attemptId      String
+  proctorSessionId String?
+  examId         String
+  userId         String
+  kind           RecordingKind
+  url            String
+  storagePath    String?
+  mimeType       String?
+  sizeBytes      BigInt?
+  chunkIndex     Int           @default(0)
+  startedAt      DateTime?
+  endedAt        DateTime?
+  durationSec    Int?
+  status         String        @default("RECORDING")
+  metadata       Json          @default("{}")
+  createdAt      DateTime      @default(now())
+
+  attempt Attempt          @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  session ProctorSession?  @relation(fields: [proctorSessionId], references: [id], onDelete: SetNull)
+
+  @@index([attemptId, kind])
+  @@index([examId])
+  @@index([createdAt])
+}
+
+// ============================== GRADING ====================================
+
+model GradingRubric {
+  id                 String   @id @default(uuid())
+  examId             String
+  questionId         String?
+  name               String
+  description        String?  @db.Text
+  criteria           Json     @default("[]")
+  totalMarks         Decimal  @default(0) @db.Decimal(7, 2)
+  requireSecondGrader Boolean @default(false)
+  createdById        String
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  exam     Exam   @relation(fields: [examId], references: [id], onDelete: Cascade)
+  createdBy User  @relation(fields: [createdById], references: [id], onDelete: Cascade)
+  rubricScores RubricScore[]
+
+  @@index([examId])
+}
+
+model RubricScore {
+  id           String   @id @default(uuid())
+  answerId     String
+  rubricId     String?
+  criterionId  String
+  criterionName String?
+  marksAwarded Decimal  @db.Decimal(7, 2)
+  maxMarks     Decimal  @default(0) @db.Decimal(7, 2)
+  comment      String?  @db.Text
+  graderId     String?
+  createdAt    DateTime @default(now())
+
+  answer Answer          @relation(fields: [answerId], references: [id], onDelete: Cascade)
+  rubric GradingRubric?  @relation(fields: [rubricId], references: [id], onDelete: SetNull)
+
+  @@index([answerId])
+}
+
+model GradingAssignment {
+  id           String        @id @default(uuid())
+  examId       String
+  attemptId    String?
+  questionId   String?
+  graderId     String
+  assignedById String?
+  status       GradingStatus @default(UNGRADED)
+  dueAt        DateTime?
+  completedAt  DateTime?
+  isSecondGrader Boolean     @default(false)
+  createdAt    DateTime      @default(now())
+
+  exam       Exam    @relation(fields: [examId], references: [id], onDelete: Cascade)
+  attempt    Attempt? @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  grader     User     @relation("GradingAssignee", fields: [graderId], references: [id], onDelete: Cascade)
+  assignedBy User?    @relation("GradingAssigner", fields: [assignedById], references: [id], onDelete: SetNull)
+
+  @@unique([examId, graderId, attemptId])
+  @@index([graderId, status])
+  @@index([examId, status])
+}
+
+model GradeOverride {
+  id            String   @id @default(uuid())
+  attemptId     String
+  answerId      String?
+  previousScore Decimal  @db.Decimal(7, 2)
+  newScore      Decimal  @db.Decimal(7, 2)
+  reason        String   @db.Text
+  overrideById  String
+  createdAt     DateTime @default(now())
+
+  attempt     Attempt  @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  answer      Answer?  @relation(fields: [answerId], references: [id], onDelete: Cascade)
+  overriddenBy User    @relation(fields: [overrideById], references: [id], onDelete: Cascade)
+
+  @@index([attemptId])
+}
+
+model AttemptFeedback {
+  id        String       @id @default(uuid())
+  attemptId String
+  kind      FeedbackKind
+  content   String       @db.Text
+  meta      Json         @default("{}")
+  createdById String?
+  createdAt DateTime     @default(now())
+
+  attempt   Attempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  createdBy User?   @relation(fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([attemptId, kind])
+}
+
+// ============================ CERTIFICATES =================================
+
+model CertificateTemplate {
+  id             String   @id @default(uuid())
+  organizationId String
+  examId         String?  @unique
+  name           String
+  description    String?  @db.Text
+  config         Json     @default("{}")
+  backgroundImageUrl String?
+  isDefault      Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  exam         Exam?        @relation(fields: [examId], references: [id], onDelete: Cascade)
+  certificates Certificate[]
+
+  @@index([organizationId])
+}
+
+model Certificate {
+  id              String            @id @default(uuid())
+  certificateNo   String            @unique
+  verifyToken     String            @unique
+  attemptId       String
+  examId          String
+  userId          String
+  organizationId  String
+  templateId      String?
+  candidateName   String
+  examTitle       String
+  scorePercent    Decimal           @db.Decimal(5, 2)
+  gradeLetter     String?
+  issuedAt        DateTime          @default(now())
+  expiresAt       DateTime?
+  status          CertificateStatus @default(PENDING)
+  pdfUrl          String?
+  qrDataUrl       String?
+  signatureHash   String?
+  digitalSignature Json             @default("{}")
+  validityYears   Int               @default(3)
+  revokedAt       DateTime?
+  revokedById     String?
+  revokeReason    String?           @db.Text
+  downloadCount   Int               @default(0)
+  verifyCount     Int               @default(0)
+  linkedInUrl     String?
+  issuedById      String?
+  emailSentAt     DateTime?
+  metadata        Json              @default("{}")
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  attempt      Attempt             @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  exam         Exam                @relation(fields: [examId], references: [id], onDelete: Cascade)
+  user         User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization Organization        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  template     CertificateTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
+  issuedBy     User?               @relation("CertificateIssuer", fields: [issuedById], references: [id], onDelete: SetNull)
+  revokedBy    User?               @relation("CertificateRevoker", fields: [revokedById], references: [id], onDelete: SetNull)
+  badge        Badge?
+  payments     Payment[]
+
+  @@index([userId, status])
+  @@index([examId])
+  @@index([organizationId, issuedAt])
+  @@index([status, expiresAt])
+}
+
+model Badge {
+  id            String   @id @default(uuid())
+  certificateId String   @unique
+  name          String
+  description   String?  @db.Text
+  imageUrl      String?
+  criteria      Json     @default("{}")
+  contextJson   Json     @default("{}")
+  providerUrl   String?
+  recipientEmail String?
+  issuedAt      DateTime @default(now())
+
+  certificate Certificate @relation(fields: [certificateId], references: [id], onDelete: Cascade)
+
+  @@index([name])
+}
+
+// =========================== NOTIFICATIONS ================================
+
+model Notification {
+  id        String              @id @default(uuid())
+  userId    String
+  type      NotificationType
+  title     String
+  body      String?             @db.Text
+  data      Json                @default("{}")
+  channel   NotificationChannel @default(IN_APP)
+  priority  Int                 @default(0)
+  actionUrl String?
+  imageUrl  String?
+  readAt    DateTime?
+  sentAt    DateTime?
+  deliveredAt DateTime?
+  archivedAt DateTime?
+  error     String?
+  createdAt DateTime            @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, readAt])
+  @@index([userId, createdAt])
+  @@index([type])
+}
+
+model NotificationPreference {
+  id               String    @id @default(uuid())
+  userId           String    @unique
+  channels         Json      @default("{}")
+  mutedTypes       String[]  @default([])
+  emailDigest      String    @default("IMMEDIATE")
+  quietHoursStart  String?
+  quietHoursEnd    String?
+  smsEnabled       Boolean   @default(false)
+  smsNumber        String?
+  pushEnabled      Boolean   @default(true)
+  unsubscribeAll   Boolean   @default(false)
+  timezone         String    @default("UTC")
+  updatedAt        DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ============================== PAYMENTS ===================================
+
+model Payment {
+  id                    String          @id @default(uuid())
+  userId                String?
+  organizationId        String?
+  examId                String?
+  attemptId             String?
+  certificateId         String?
+  provider              PaymentProvider @default(STRIPE)
+  purpose               PaymentPurpose
+  status                PaymentStatus   @default(PENDING)
+  amountCents           Int
+  currency              String          @default("usd")
+  feeCents              Int             @default(0)
+  netCents              Int             @default(0)
+  refundedCents         Int             @default(0)
+  stripePaymentIntentId String?         @unique
+  stripeCheckoutId      String?
+  stripeCustomerId      String?
+  stripeInvoiceId       String?
+  promoCodeId           String?
+  invoiceId             String?
+  seatCount             Int             @default(1)
+  description           String?         @db.Text
+  paidAt                DateTime?
+  failedAt              DateTime?
+  refundedAt            DateTime?
+  refundReason          String?         @db.Text
+  failureMessage        String?
+  metadata              Json            @default("{}")
+  createdAt             DateTime        @default(now())
+  updatedAt             DateTime        @updatedAt
+
+  user         User?              @relation(fields: [userId], references: [id], onDelete: SetNull)
+  organization Organization?      @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  exam         Exam?              @relation(fields: [examId], references: [id], onDelete: SetNull)
+  attempt      Attempt?           @relation(fields: [attemptId], references: [id], onDelete: SetNull)
+  certificate  Certificate?       @relation(fields: [certificateId], references: [id], onDelete: SetNull)
+  promoCode    PromoCode?         @relation(fields: [promoCodeId], references: [id], onDelete: SetNull)
+  invoice      Invoice?           @relation("PaymentInvoice", fields: [invoiceId], references: [id], onDelete: SetNull)
+
+  @@index([userId, status])
+  @@index([organizationId, createdAt])
+  @@index([examId])
+  @@index([status, createdAt])
+  @@index([purpose, status])
+}
+
+model Invoice {
+  id             String        @id @default(uuid())
+  number         String        @unique
+  userId         String?
+  organizationId String?
+  examId         String?
+  paymentId      String?       @unique
+  status         PaymentStatus @default(PENDING)
+  items          Json          @default("[]")
+  subtotalCents  Int           @default(0)
+  taxCents       Int           @default(0)
+  discountCents  Int           @default(0)
+  totalCents     Int           @default(0)
+  currency       String        @default("usd")
+  billingName    String?
+  billingEmail   String?
+  billingAddress Json          @default("{}")
+  pdfUrl         String?
+  issuedAt       DateTime      @default(now())
+  dueAt          DateTime?
+  paidAt         DateTime?
+  notes          String?       @db.Text
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  user         User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  exam         Exam?         @relation(fields: [examId], references: [id], onDelete: SetNull)
+  payment      Payment?      @relation("PaymentInvoice", fields: [paymentId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, status])
+  @@index([userId])
+}
+
+model PromoCode {
+  id                String    @id @default(uuid())
+  code              String    @unique
+  organizationId    String?
+  examId            String?
+  kind              PromoKind @default(PERCENT)
+  value             Decimal   @db.Decimal(9, 2)
+  maxDiscountCents  Int?
+  minAmountCents    Int       @default(0)
+  maxUses           Int?
+  usedCount         Int       @default(0)
+  perUserLimit      Int       @default(1)
+  appliesToExamIds  String[]  @default([])
+  expiresAt         DateTime?
+  isActive          Boolean   @default(true)
+  createdById       String
+  createdAt         DateTime  @default(now())
+
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  exam         Exam?         @relation(fields: [examId], references: [id], onDelete: Cascade)
+  createdBy    User          @relation(fields: [createdById], references: [id], onDelete: Cascade)
+  payments     Payment[]
+
+  @@index([organizationId, isActive])
+}
+
+model BulkRegistration {
+  id             String        @id @default(uuid())
+  organizationId String
+  examId         String
+  seats          Int
+  unitPriceCents Int           @default(0)
+  totalPriceCents Int          @default(0)
+  status         PaymentStatus @default(PENDING)
+  paymentId      String?
+  invoiceNumber  String?
+  csvFileUrl     String?
+  createdById    String
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  exam         Exam         @relation(fields: [examId], references: [id], onDelete: Cascade)
+  createdBy    User         @relation(fields: [createdById], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, examId])
+}
+
+// ============================== LIVE QUIZ ==================================
+
+model LiveQuizSession {
+  id                   String         @id @default(uuid())
+  examId               String
+  hostId               String
+  organizationId       String?
+  code                 String         @unique
+  status               LiveQuizStatus @default(WAITING)
+  currentQuestionIndex Int            @default(0)
+  questionTimeLimitSec Int            @default(20)
+  leaderboardVisible   Boolean        @default(true)
+  teamMode             Boolean        @default(false)
+  allowMobileJoin      Boolean        @default(true)
+  joinUrl              String?
+  participantCount     Int            @default(0)
+  answeredCount        Int            @default(0)
+  reactionsJson        Json           @default("[]")
+  startedAt            DateTime?
+  endedAt              DateTime?
+  resultsSavedAt       DateTime?
+  createdAt            DateTime       @default(now())
+  updatedAt            DateTime       @updatedAt
+
+  exam        Exam                     @relation(fields: [examId], references: [id], onDelete: Cascade)
+  host        User                     @relation(fields: [hostId], references: [id], onDelete: Cascade)
+  participants LiveQuizParticipant[]
+  teams       Team[]
+  questionResults LiveQuizQuestionResult[]
+
+  @@index([examId, status])
+  @@index([status, createdAt])
+}
+
+model Team {
+  id          String   @id @default(uuid())
+  sessionId   String
+  name        String
+  color       String?
+  score       Decimal  @default(0) @db.Decimal(9, 2)
+  rank        Int?
+  createdById String?
+  createdAt   DateTime @default(now())
+
+  session      LiveQuizSession       @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  createdBy    User?                 @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  participants LiveQuizParticipant[]
+
+  @@index([sessionId])
+}
+
+model LiveQuizParticipant {
+  id            String   @id @default(uuid())
+  sessionId     String
+  userId        String
+  displayName   String?
+  teamId        String?
+  score         Decimal  @default(0) @db.Decimal(9, 2)
+  correctCount  Int      @default(0)
+  answeredCount Int      @default(0)
+  bestStreak    Int      @default(0)
+  rank          Int?
+  lastAnswerMs  Int?
+  joinedAt      DateTime @default(now())
+  disconnectedAt DateTime?
+
+  session LiveQuizSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  team    Team?           @relation(fields: [teamId], references: [id], onDelete: SetNull)
+
+  @@unique([sessionId, userId])
+  @@index([sessionId, score])
+}
+
+model LiveQuizQuestionResult {
+  id            String   @id @default(uuid())
+  sessionId     String
+  questionId    String
+  questionIndex Int      @default(0)
+  optionCounts  Json     @default("{}")
+  answerCount   Int      @default(0)
+  correctCount  Int      @default(0)
+  avgResponseMs Int?
+  closedAt      DateTime?
+
+  session  LiveQuizSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  question Question        @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  user     User?           @relation(fields: [updatedById], references: [id], onDelete: SetNull)
+  updatedById String?
+
+  @@index([sessionId, questionIndex])
+}
+
+// ============================== ANALYTICS ==================================
+
+model AnalyticsAggregate {
+  id             String         @id @default(uuid())
+  scope          AnalyticsScope
+  organizationId String?
+  examId         String?
+  userId         String?
+  metric         String
+  dimension      Json           @default("{}")
+  value          Json
+  bucket         DateTime?
+  computedAt     DateTime       @default(now())
+  createdAt      DateTime       @default(now())
+
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  exam         Exam?         @relation(fields: [examId], references: [id], onDelete: Cascade)
+  user         User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([scope, metric, bucket])
+  @@index([organizationId, createdAt])
+  @@index([examId, metric])
+  @@index([userId, metric])
+}
+
+model QuestionStat {
+  id                  String   @id @default(uuid())
+  questionId          String
+  examId              String?
+  attempts            Int      @default(0)
+  correctCount        Int      @default(0)
+  incorrectCount      Int      @default(0)
+  skippedCount        Int      @default(0)
+  avgScorePercent     Decimal  @default(0) @db.Decimal(5, 2)
+  avgTimeSec          Decimal  @default(0) @db.Decimal(9, 2)
+  difficultyIndex     Decimal  @default(0) @db.Decimal(5, 4)
+  discriminationIndex Decimal  @default(0) @db.Decimal(5, 4)
+  optionDistribution  Json     @default("{}")
+  hintUseCount        Int      @default(0)
+  updatedById         String?
+  updatedAt           DateTime @updatedAt
+  createdAt           DateTime @default(now())
+
+  question  Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  exam      Exam?    @relation(fields: [examId], references: [id], onDelete: Cascade)
+  updatedBy User?    @relation(fields: [updatedById], references: [id], onDelete: SetNull)
+
+  @@unique([questionId, examId])
+  @@index([examId])
+  @@index([difficultyIndex])
+}
+
+model AiUsageLog {
+  id                String       @id @default(uuid())
+  organizationId    String?
+  userId            String?
+  examId            String?
+  attemptId         String?
+  questionId        String?
+  feature           AiFeature
+  aiModel           String
+  provider          String       @default("openrouter")
+  requestId         String?
+  promptTokens      Int          @default(0)
+  completionTokens  Int          @default(0)
+  totalTokens       Int          @default(0)
+  costUsd           Decimal      @default(0) @db.Decimal(12, 6)
+  latencyMs         Int?
+  status            AiCallStatus @default(SUCCESS)
+  inputSummary      String?      @db.Text
+  outputSummary     String?      @db.Text
+  error             String?      @db.Text
+  metadata          Json         @default("{}")
+  createdAt         DateTime     @default(now())
+
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  user         User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, createdAt])
+  @@index([feature, createdAt])
+  @@index([userId, createdAt])
+  @@index([status])
+}
+
+// ================================ ADMIN ====================================
+
+model AuditLog {
+  id             String       @id @default(uuid())
+  actorId        String?
+  actorRole      MemberRole?
+  action         String
+  entityType     String
+  entityId       String?
+  organizationId String?
+  ipAddress      String?
+  userAgent      String?
+  metadata       Json         @default("{}")
+  isSensitive    Boolean      @default(false)
+  createdAt      DateTime     @default(now())
+
+  actor        User?         @relation(fields: [actorId], references: [id], onDelete: SetNull)
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+
+  @@index([entityType, entityId])
+  @@index([actorId, createdAt])
+  @@index([organizationId, createdAt])
+  @@index([action])
+}
+
+model PlatformSetting {
+  id          String   @id @default(uuid())
+  key         String   @unique
+  value       Json
+  groupName   String   @default("general")
+  description String?
+  updatedById String?
+  updatedAt   DateTime @updatedAt
+  createdAt   DateTime @default(now())
+
+  updatedBy User? @relation(fields: [updatedById], references: [id], onDelete: SetNull)
+}
+
+model FeatureFlag {
+  id          String    @id @default(uuid())
+  key         String    @unique
+  description String?
+  enabled     Boolean   @default(false)
+  rolloutPercent Int    @default(0)
+  planTiers   PlanTier[] @default([])
+  config      Json      @default("{}")
+  updatedById String?
+  updatedAt   DateTime  @updatedAt
+  createdAt   DateTime  @default(now())
+
+  updatedBy User? @relation(fields: [updatedById], references: [id], onDelete: SetNull)
+}
+
+model Announcement {
+  id             String              @id @default(uuid())
+  title          String
+  body           String              @db.Text
+  audience       AnnouncementAudience @default(ALL_USERS)
+  organizationId String?
+  examId         String?
+  bannerUrl      String?
+  actionUrl      String?
+  isPublished    Boolean             @default(false)
+  publishedAt    DateTime?
+  expiresAt      DateTime?
+  createdById    String
+  viewCount      Int                 @default(0)
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  exam         Exam?         @relation(fields: [examId], references: [id], onDelete: Cascade)
+  createdBy    User          @relation(fields: [createdById], references: [id], onDelete: Cascade)
+
+  @@index([audience, isPublished])
+  @@index([organizationId])
+}
+
+model WebhookEvent {
+  id         String    @id @default(uuid())
+  provider   String
+  externalId String    @unique
+  type       String
+  payload    Json
+  status     String    @default("RECEIVED")
+  error      String?   @db.Text
+  processedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([provider, type])
+  @@index([status, createdAt])
+}

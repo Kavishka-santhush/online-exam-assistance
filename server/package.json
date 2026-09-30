@@ -1,0 +1,66 @@
+{
+  "name": "exam-platform-server",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Online Exam & Assessment Platform - REST API, Socket.io proctoring, Prisma/PostgreSQL",
+  "main": "index.js",
+  "type": "commonjs",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:deploy": "prisma migrate deploy",
+    "prisma:reset": "prisma migrate reset",
+    "prisma:studio": "prisma studio",
+    "prisma:seed": "prisma db seed",
+    "lint": "eslint src --ext .js"
+  },
+  "prisma": {
+    "seed": "node prisma/seeds/index.js"
+  },
+  "dependencies": {
+    "@clerk/express": "^1.1.0",
+    "@clerk/backend": "^1.23.0",
+    "@prisma/client": "^5.22.0",
+    "@react-email/components": "^0.0.32",
+    "@react-email/render": "^1.0.3",
+    "bcryptjs": "^2.4.3",
+    "bullmq": "^5.34.0",
+    "compression": "^1.7.5",
+    "cors": "^2.8.5",
+    "dayjs": "^1.11.13",
+    "dotenv": "^16.4.7",
+    "exceljs": "^4.4.0",
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.5.0",
+    "helmet": "^8.0.0",
+    "isolated-vm": "^5.0.1",
+    "jsonwebtoken": "^9.0.2",
+    "morgan": "^1.10.0",
+    "multer": "^1.4.5-lts.1",
+    "node-cron": "^3.0.3",
+    "nodemailer": "^6.9.16",
+    "puppeteer": "^23.10.4",
+    "qrcode": "^1.5.4",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "slugify": "^1.6.6",
+    "socket.io": "^4.8.1",
+    "stripe": "^17.5.0",
+    "superjson": "^2.2.2",
+    "swagger-ui-express": "^5.2.8",
+    "uuid": "^11.0.3",
+    "xss": "^1.0.15",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "eslint": "^9.17.0",
+    "nodemon": "^3.1.9",
+    "prisma": "^5.22.0",
+    "tsx": "^4.19.2"
+  }
+}
