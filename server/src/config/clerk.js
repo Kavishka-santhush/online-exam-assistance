@@ -13,6 +13,13 @@ const prisma = require('./prisma');
 const logger = require('../utils/logger.util');
 const { ApiError } = require('../utils/response.util');
 
+function clerkKeysUsable() {
+  const sk = String(env.CLERK_SECRET_KEY ?? '');
+  const pk = String(env.CLERK_PUBLISHABLE_KEY ?? '');
+  return /^sk_(test|live)_/.test(sk) && /^pk_(test|live)_/.test(pk) &&
+    !/placeholder|your[-_]?key|changeme/i.test(`${sk}${pk}`);
+}
+
 const clerkClient = createClerkClient({
   secretKey: env.CLERK_SECRET_KEY,
   publishableKey: env.CLERK_PUBLISHABLE_KEY,
@@ -135,6 +142,7 @@ async function deleteLocalUser(clerkId) {
 
 module.exports = {
   clerkClient,
+  clerkKeysUsable,
   deleteLocalUser,
   ensureProfileRows,
   findLocalUserByClerkId,
