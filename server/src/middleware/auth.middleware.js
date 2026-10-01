@@ -17,13 +17,26 @@ const { ApiError } = require('../utils/response.util');
 
 const ORG_HEADER = 'x-organization-id';
 
+/**
+ * `getAuth` requires Clerk's middleware to have run. When CLERK_* keys are
+ * placeholders the mount is skipped, so treat a throwing/absent auth object
+ * as "no session" (401 downstream) instead of a 500.
+ */
+function safeGetAuth(req) {
+  try {
+    return getAuth(req) ?? {};
+  } catch {
+    return {};
+  }
+}
+
 /** Used only to pick a default organization when a user has several. */
 const ROLE_PRECEDENCE = ['ORG_ADMIN', 'INSTRUCTOR', 'PROCTOR', 'CANDIDATE'];
 
 /** Reject suspended accounts and anonymous visitors. */
 async function authenticate(req, res, next) {
   try {
-    const { userId: clerkId } = getAuth(req);
+    const { userId: clerkId } = safeGetAuth(req);
     if (!clerkId) throw ApiError.unauthorized('Sign in to continue');
 
     const user = await requireLocalUser(clerkId);
@@ -47,7 +60,7 @@ async function authenticate(req, res, next) {
 /** Same as `authenticate` but continues as a guest when there is no session. */
 async function optionalAuthenticate(req, res, next) {
   try {
-    const { userId: clerkId } = getAuth(req);
+    const { userId: clerkId } = safeGetAuth(req);
     if (clerkId) {
       const user = await requireLocalUser(clerkId).catch(() => null);
       if (user) {
