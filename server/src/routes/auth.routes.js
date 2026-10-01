@@ -11,6 +11,7 @@ const { clerkMiddleware } = require('@clerk/express');
 const { webhook } = require('@clerk/backend');
 const { z } = require('zod');
 const env = require('../config/env');
+const { clerkKeysUsable } = require('../config/clerk');
 const controller = require('../controllers/auth.controller');
 const { authenticate } = require('../middleware/auth.middleware');
 const { validate } = require('../middleware/validate.middleware');
@@ -50,7 +51,7 @@ const updateProfileSchema = z.object({
 
 const acceptInviteSchema = z.object({ token: z.string().min(1) });
 
-router.use(clerkMiddleware());
+if (clerkKeysUsable()) router.use(clerkMiddleware());
 
 // Clerk -> local user sync. Raw body + signature verification.
 router.post(
