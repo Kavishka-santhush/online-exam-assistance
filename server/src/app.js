@@ -23,6 +23,7 @@ const { clerkMiddleware } = require('@clerk/express');
 
 const env = require('./config/env');
 const logger = require('./utils/logger.util');
+const { clerkKeysUsable } = require('./config/clerk');
 const { errorHandler, notFoundHandler } = require('./middleware/error.middleware');
 
 // ---- routers ---------------------------------------------------------------
@@ -88,7 +89,13 @@ if (!env.isTest) {
 }
 
 // ---- Clerk authentication (verifies the JWT into req.auth) -----------------
-app.use(clerkMiddleware());
+if (clerkKeysUsable()) {
+  app.use(clerkMiddleware());
+} else {
+  // Placeholder CLERK_* keys make key parsing throw on every request; skip
+  // verification so the API still serves. Replaced by real keys via env.
+  logger.warn('CLERK_* keys are placeholders - JWT verification disabled until real keys are set');
+}
 
 // ---- body parsing (raw-passthrough for webhooks) ---------------------------
 const jsonParser = express.json({ limit: '5mb' });
