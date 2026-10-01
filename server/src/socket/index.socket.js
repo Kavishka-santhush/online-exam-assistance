@@ -24,9 +24,9 @@
  */
 
 const { Server } = require('socket.io');
-const env = require('../../config/env');
-const logger = require('../../utils/logger.util');
-const { clerkClient, requireLocalUser } = require('../../config/clerk');
+const env = require('../config/env');
+const logger = require('../utils/logger.util');
+const { clerkClient, requireLocalUser } = require('../config/clerk');
 
 const { registerExamHandlers } = require('./exam.socket');
 const { registerProctoringHandlers } = require('./proctoring.socket');
